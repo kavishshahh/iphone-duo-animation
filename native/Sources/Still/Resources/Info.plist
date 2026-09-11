@@ -11,6 +11,6 @@
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
-<key>NSScreenCaptureUsageDescription</key><string>Still takes one temporary desktop snapshot to show the folding effect. The image stays on your Mac and is discarded after the gesture.</string>
+<key>NSScreenCaptureUsageDescription</key><string>Still takes a single snapshot of your desktop when the lid starts to close, so it can fold that picture. No video, no audio, nothing saved or sent anywhere; the image is discarded when the lid reopens.</string>
 <key>NSHumanReadableCopyright</key><string>Still prototype. 2026.</string>
 </dict></plist>

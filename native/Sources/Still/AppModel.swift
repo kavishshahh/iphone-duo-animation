@@ -84,9 +84,13 @@ final class AppModel: ObservableObject {
     }
 
     func requestCaptureAccess() {
+        // macOS labels this permission "record this computer's screen and audio" for every app
+        // that asks, even one that takes a single screenshot with audio disabled, as Still does.
+        message = "macOS will say Still wants to record your screen and audio. That is Apple's wording for the permission; Still takes one snapshot and never records audio or video."
         _ = CGRequestScreenCaptureAccess()
         captureAllowed = DesktopCapture.isAllowed
-        message = captureAllowed ? "Screen Recording is available." : "Allow Still in Screen Recording. macOS may ask you to reopen the app."
+        if captureAllowed { message = "Screen Recording is available." }
+        else if message.hasPrefix("macOS will say") { message += " Allow Still in Screen Recording, then reopen the app if asked." }
     }
 
     func openCaptureSettings() {
