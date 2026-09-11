@@ -1,0 +1,18 @@
+name: Build Mac prototype
+on:
+  push:
+    paths: ['native/**', '.github/workflows/mac-build.yml']
+  workflow_dispatch:
+jobs:
+  mac:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test and build app
+        run: bash native/scripts/build.sh
+      - name: Archive app preserving bundle metadata
+        run: ditto -c -k --sequesterRsrc --keepParent native/build/Still.app Still-mac-prototype.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Still-mac-prototype
+          path: Still-mac-prototype.zip

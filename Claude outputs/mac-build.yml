@@ -1,0 +1,28 @@
+name: Build Still
+on:
+  push:
+    paths: ['native/**', 'site/**', '.github/workflows/mac-build.yml']
+  workflow_dispatch:
+jobs:
+  geometry:
+    name: Web fold-math tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test site/test/*.test.mjs
+  mac:
+    name: Mac prototype
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test and build app
+        run: bash native/scripts/build.sh
+      - name: Archive app preserving bundle metadata
+        run: ditto -c -k --sequesterRsrc --keepParent native/build/Still.app Still-mac-prototype.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Still-mac-prototype
+          path: Still-mac-prototype.zip
