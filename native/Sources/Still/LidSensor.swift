@@ -20,6 +20,7 @@ final class LidSensor {
     private static let noOptions = IOOptionBits(kIOHIDOptionsTypeNone)
     private static let pollInterval: DispatchTimeInterval = .milliseconds(33)
     private static let failureLimit = 5
+    private static let retryDelay: DispatchTimeInterval = .seconds(2)
 
     private let queue = DispatchQueue(label: "app.still.sensor", qos: .userInitiated)
     private let report: @MainActor (SensorReading) -> Void
@@ -35,25 +36,27 @@ final class LidSensor {
     }
 
     func start() {
-        queue.async { [self] in
-            stopOnQueue()
-            switch Self.probe() {
-            case .readable(let candidate):
-                guard IOHIDDeviceOpen(candidate, Self.noOptions) == kIOReturnSuccess else {
-                    publish(nil, "The lid sensor was found but could not be opened. Manual preview is available.")
-                    return
-                }
-                device = candidate
-                let clock = DispatchSource.makeTimerSource(queue: queue)
-                clock.schedule(deadline: .now(), repeating: Self.pollInterval, leeway: .milliseconds(3))
-                clock.setEventHandler { [weak self] in self?.poll() }
-                timer = clock
-                clock.resume()
-            case .vendorSpecificOnly:
-                publish(nil, "This Mac has lid-sensor hardware, but it is exposed through an interface Still cannot read yet. Manual preview works.")
-            case .notFound:
-                publish(nil, "No readable lid-angle sensor. Manual preview works on this Mac.")
+        queue.async { [self] in startOnQueue() }
+    }
+
+    private func startOnQueue() {
+        stopOnQueue()
+        switch Self.probe() {
+        case .readable(let candidate):
+            guard IOHIDDeviceOpen(candidate, Self.noOptions) == kIOReturnSuccess else {
+                publish(nil, "The lid sensor was found but could not be opened. Manual preview is available.")
+                return
             }
+            device = candidate
+            let clock = DispatchSource.makeTimerSource(queue: queue)
+            clock.schedule(deadline: .now(), repeating: Self.pollInterval, leeway: .milliseconds(3))
+            clock.setEventHandler { [weak self] in self?.poll() }
+            timer = clock
+            clock.resume()
+        case .vendorSpecificOnly:
+            publish(nil, "This Mac has lid-sensor hardware, but it is exposed through an interface Still cannot read yet. Manual preview works.")
+        case .notFound:
+            publish(nil, "No readable lid-angle sensor. Manual preview works on this Mac.")
         }
     }
 
@@ -127,8 +130,15 @@ final class LidSensor {
         guard let angle = Self.read(device) else {
             failures += 1
             if failures == Self.failureLimit {
-                publish(nil, "Lid sensor stopped responding. Reopen the lid, then rescan.")
+                // Re-probe rather than give up. Reads fail for reasons that pass on their own —
+                // another process holding the device, a sleep/wake transition — and a permanent
+                // stop turned any of those into a sensor that stays dead until the user finds the
+                // Rescan button, with every lid feature disabled meanwhile and no hint why.
+                publish(nil, "Lid sensor interrupted. Reconnecting…")
                 stopOnQueue()
+                queue.asyncAfter(deadline: .now() + Self.retryDelay) { [weak self] in
+                    self?.startOnQueue()
+                }
             }
             return
         }

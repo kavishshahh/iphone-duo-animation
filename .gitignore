@@ -4,3 +4,4 @@ native/build/
 .sites-runtime/
 node_modules/
 artwork/
+native/.signing-identity

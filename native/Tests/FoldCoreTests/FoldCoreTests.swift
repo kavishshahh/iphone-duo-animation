@@ -28,6 +28,41 @@ final class FoldCoreTests: XCTestCase {
         XCTAssertEqual(t.validated.fadeAngle, 18)
         XCTAssertEqual(FoldMath.progress(angle: .nan, tuning: t), 0)
     }
+    func testOpacityNeverDisappearsOrExceedsFull() {
+        var t = FoldTuning()
+        XCTAssertEqual(t.validated.opacity, 1, "an untouched install must fully replace the desktop")
+
+        // A fully transparent overlay is still a window covering every screen: in screen-saver
+        // mode it would swallow input while showing nothing, which reads as a hang.
+        t.opacity = 0
+        XCTAssertEqual(t.validated.opacity, 0.15)
+        t.opacity = -3
+        XCTAssertEqual(t.validated.opacity, 0.15)
+
+        t.opacity = 4
+        XCTAssertEqual(t.validated.opacity, 1, "alphaValue above 1 is undefined for NSWindow")
+        t.opacity = .nan
+        XCTAssertEqual(t.validated.opacity, 1)
+    }
+
+    func testFullyOpenLidShowsNothing() {
+        // The behaviour the lid mode is judged by: resting open is clear, starting to close folds,
+        // and returning to open clears it again.
+        var gate = GestureGate()
+        let working = 133.0
+
+        XCTAssertEqual(gate.update(angle: working, workingAngle: working), .idle)
+        XCTAssertEqual(gate.update(angle: working - 1, workingAngle: working), .idle,
+                       "a lid that has barely moved must not trigger a capture")
+
+        XCTAssertEqual(gate.update(angle: working - 10, workingAngle: working), .captureRequested)
+        gate.captured()
+        XCTAssertEqual(gate.update(angle: working - 40, workingAngle: working), .active)
+
+        XCTAssertEqual(gate.update(angle: working, workingAngle: working), .idle,
+                       "reopening fully must clear the effect")
+    }
+
     func testSmoothingIsIndependentOfFrameRate() {
         var slow = 105.0
         var fast = 105.0

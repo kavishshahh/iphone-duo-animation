@@ -7,6 +7,10 @@ public struct FoldTuning: Codable, Equatable {
     public var frost: Double = 0.55
     public var shade: Double = 0.35
     public var response: Double = 0.72
+    /// How strongly the folded copy covers the real desktop. 1 replaces it outright; lower values
+    /// let the untouched desktop show through, so the fold reads as a veil over the screen rather
+    /// than a replacement of it.
+    public var opacity: Double = 1.0
     public init() {}
 
     public var validated: Self {
@@ -17,6 +21,9 @@ public struct FoldTuning: Codable, Equatable {
         value.frost = finiteClamp(frost, 0, 1, fallback: 0.55)
         value.shade = finiteClamp(shade, 0, 1, fallback: 0.35)
         value.response = finiteClamp(response, 0, 1, fallback: 0.72)
+        // Floored well above zero: an overlay at 0 is invisible but still swallows the screen in
+        // screen-saver mode, which would read as the app being broken.
+        value.opacity = finiteClamp(opacity, 0.15, 1, fallback: 1.0)
         return value
     }
 }

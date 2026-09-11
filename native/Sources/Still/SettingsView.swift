@@ -26,6 +26,8 @@ struct SettingsView: View {
             ZStack(alignment: .bottomTrailing) {
                 MetalPreview(angle: model.previewAngle, tuning: model.tuning)
                     .aspectRatio(1.6, contentMode: .fit)
+                    .opacity(model.tuning.validated.opacity)
+                    .background(Color.black)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(.white.opacity(0.15)))
                 Text("\(Int(model.previewAngle))°")
@@ -71,6 +73,9 @@ struct SettingsView: View {
                         tuningSlider("Perspective", value: $model.tuning.perspective)
                         tuningSlider("Frost", value: $model.tuning.frost)
                         tuningSlider("Shadow", value: $model.tuning.shade)
+                        // Floor matches `FoldTuning.validated`; a slider that travels to 0 would
+                        // report a value the effect silently refuses to use.
+                        tuningSlider("Opacity", value: $model.tuning.opacity, in: 0.15...1)
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 13) {
@@ -103,17 +108,17 @@ struct SettingsView: View {
             }.frame(height: 158)
 
             Divider()
-            HStack {
-                Toggle("Follow lid", isOn: $model.automaticEnabled)
-                    .toggleStyle(.switch)
-                    .disabled(model.sensorAngle == nil || !model.captureAllowed)
+            HStack(spacing: 12) {
+                Text(model.automaticEnabled
+                     ? "Following your lid — open is clear, closing folds."
+                     : "Apply arms the lid gesture. Nothing changes until you close the screen.")
+                    .font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                if model.isBusy {
-                    Button("Stop preview") { model.pause() }
-                } else {
-                    Button("Preview on desktop") { model.playDesktopDemo() }
-                        .buttonStyle(.borderedProminent)
-                }
+                Button("Cancel") { model.cancelEffect() }
+                    .disabled(!model.effectOnScreen)
+                Button("Apply") { model.applyToDesktop() }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(model.effectOnScreen || !model.captureAllowed)
             }
             Text(model.message).font(.callout).foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading).lineLimit(2)
@@ -124,10 +129,11 @@ struct SettingsView: View {
         .onExitCommand { model.pause() }
     }
 
-    private func tuningSlider(_ label: String, value: Binding<Double>) -> some View {
+    private func tuningSlider(_ label: String, value: Binding<Double>,
+                              in range: ClosedRange<Double> = 0...1) -> some View {
         HStack(spacing: 16) {
             Text(label).frame(width: 100, alignment: .leading)
-            Slider(value: value, in: 0...1).accessibilityLabel(label)
+            Slider(value: value, in: range).accessibilityLabel(label)
             Text("\(Int(value.wrappedValue * 100))%").monospacedDigit()
                 .foregroundStyle(.secondary).frame(width: 45, alignment: .trailing)
         }

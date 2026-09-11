@@ -74,6 +74,24 @@ final class FoldSurface: MTKView {
         needsDisplay = true
     }
 
+    /// Renders from the view's own clock instead of on demand.
+    ///
+    /// On-demand drawing (`isPaused` + `enableSetNeedsDisplay`) is right for the settings preview,
+    /// which SwiftUI redraws whenever anything changes. It is wrong for the desktop overlay: the
+    /// only `needsDisplay` was set before the panel was ordered front, so that draw could run
+    /// while `currentDrawable` was still nil, return without drawing, and never be asked again —
+    /// leaving an opaque black panel over the desktop.
+    func beginContinuousDisplay() {
+        enableSetNeedsDisplay = false
+        isPaused = false
+        preferredFramesPerSecond = 60
+    }
+
+    func endContinuousDisplay() {
+        isPaused = true
+        enableSetNeedsDisplay = true
+    }
+
     func clearSnapshot() {
         imageIdentity = nil
         try? foldRenderer?.setImage(nil)

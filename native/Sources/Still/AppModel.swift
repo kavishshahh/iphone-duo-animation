@@ -1,7 +1,14 @@
 import AppKit
 import SwiftUI
 import Combine
+import OSLog
 import FoldCore
+
+/// Screen Recording is granted per code signature, so when it silently fails to stick nothing in
+/// the UI distinguishes "never asked" from "asked and already refused". These lines make the real
+/// TCC answer readable:
+///   log show --predicate 'subsystem == "dev.akki.still"' --last 5m
+let stillLog = Logger(subsystem: "dev.akki.still", category: "permission")
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -9,14 +16,30 @@ final class AppModel: ObservableObject {
     @Published var previewAngle = 105.0
     @Published var sensorAngle: Double?
     @Published var sensorMessage = "Checking this Mac…"
-    @Published var message = "Try the preview. Desktop mode asks for Screen Recording access."
+    @Published var message = "Checking this Mac…"
     @Published var captureAllowed = false
     @Published var isBusy = false
     @Published var playingPreview = false
+    /// The desktop fold is being held indefinitely, until the user dismisses it.
+    @Published var screenSaverActive = false
     @Published var automaticEnabled = false {
         didSet {
-            if !automaticEnabled { cancelGesture() }
-            else { gate.reset(); message = "Following your lid. Reopen to your working angle to clear the effect." }
+            if !automaticEnabled { cancelGesture(); return }
+            gate.reset()
+            // Adopt the lid's current angle as "open" unless it is already close to it.
+            //
+            // The effect is defined as starting just below the working angle, so a default of 105°
+            // on a lid that rests at 133° means nothing happens until the screen is most of the
+            // way shut — which reads as the feature being broken rather than as a setting being
+            // wrong. Calibrating on enable makes "open = clear, start closing = fold" true for the
+            // way this particular Mac is actually sitting.
+            if let angle = sensorAngle, (75...135).contains(angle), abs(angle - tuning.workingAngle) > 6 {
+                tuning.workingAngle = angle
+                previewAngle = angle
+                message = "Following your lid, with \(Int(angle))° set as open. Close it slowly to fold the desktop."
+            } else {
+                message = "Following your lid. Reopen to your working angle to clear the effect."
+            }
         }
     }
 
@@ -28,6 +51,7 @@ final class AppModel: ObservableObject {
     private var gestureID = UUID()
     private var renderTimer: Timer?
     private var previewTimer: Timer?
+    private var screenSaverTimer: Timer?
     private var previousTick = Date.timeIntervalSinceReferenceDate
     private var lastSensorTick = Date.timeIntervalSinceReferenceDate
     private var smoothedAngle = 105.0
@@ -41,9 +65,23 @@ final class AppModel: ObservableObject {
         }
         previewAngle = tuning.workingAngle
         captureAllowed = DesktopCapture.isAllowed
+        // Ask once at launch when the core feature is unusable without it. Also the only way to
+        // learn whether macOS still *offers* the prompt: a `false` return with no dialog means a
+        // decision is already recorded against this signature and it will never ask again.
+        if !captureAllowed {
+            let granted = CGRequestScreenCaptureAccess()
+            stillLog.notice("screen capture not yet granted; asking (CG returned \(granted, privacy: .public))")
+            Task { [weak self] in
+                let ok = await DesktopCapture.provokePermissionPrompt()
+                stillLog.notice("screen capture after ScreenCaptureKit request: \(ok, privacy: .public)")
+                self?.captureAllowed = DesktopCapture.isAllowed
+                self?.refreshStatus()
+            }
+        }
         sensor = LidSensor { [weak self] reading in self?.receive(reading) }
         rescan()
         observePowerAndSession()
+        refreshStatus()
     }
 
     /// Timers are scheduled on the main run loop, so their callbacks arrive on the
@@ -83,12 +121,32 @@ final class AppModel: ObservableObject {
         message = "Working angle saved. Enable Follow lid to start."
     }
 
+    /// Rewrites the idle status line from live state.
+    ///
+    /// `message` used to be set once at launch and then only by actions, so after granting Screen
+    /// Recording it kept telling the user to grant Screen Recording — the app contradicting the
+    /// buttons next to it. Only touches the line when nothing is running, so it never overwrites
+    /// feedback from something the user just did.
+    func refreshStatus() {
+        guard !effectOnScreen else { return }
+        if !captureAllowed {
+            message = "Allow Screen Recording to fold the desktop. The slider preview works without it."
+        } else if sensorAngle == nil {
+            message = "Ready. Press Apply to fold the desktop; lid follow needs a readable hinge sensor."
+        } else {
+            message = "Ready. Press Apply, or turn on lid follow to fold as you close the screen."
+        }
+    }
+
     func requestCaptureAccess() {
         // macOS labels this permission "record this computer's screen and audio" for every app
         // that asks, even one that takes a single screenshot with audio disabled, as Still does.
         message = "macOS will say Still wants to record your screen and audio. That is Apple's wording for the permission; Still takes one snapshot and never records audio or video."
-        _ = CGRequestScreenCaptureAccess()
+        let granted = CGRequestScreenCaptureAccess()
         captureAllowed = DesktopCapture.isAllowed
+        // A `false` here with no prompt shown means macOS already has a decision on file for this
+        // signature and will never ask again.
+        stillLog.notice("screen capture request returned \(granted, privacy: .public)")
         if captureAllowed { message = "Screen Recording is available." }
         else if message.hasPrefix("macOS will say") { message += " Allow Still in Screen Recording, then reopen the app if asked." }
     }
@@ -141,8 +199,10 @@ final class AppModel: ObservableObject {
 
     private func receive(_ reading: SensorReading) {
         lastSensorTick = Date.timeIntervalSinceReferenceDate
+        let hadAngle = sensorAngle != nil
         if sensorAngle != reading.angle { sensorAngle = reading.angle }
         if sensorMessage != reading.message { sensorMessage = reading.message }
+        if hadAngle != (sensorAngle != nil) { refreshStatus() }
         guard let angle = reading.angle else {
             automaticEnabled = false
             return
@@ -158,7 +218,10 @@ final class AppModel: ObservableObject {
     }
 
     private func beginAutomaticCapture() {
-        guard let screen = DesktopCapture.builtInScreen() else {
+        // The lid sensor lives in the built-in display, so its absence means this Mac cannot drive
+        // the gesture at all — but the fold itself covers every screen, since closing the lid on a
+        // Mac with an external monitor should still fold what the user is looking at.
+        guard DesktopCapture.builtInScreen() != nil else {
             gate.fail()
             message = "Automatic mode needs the built-in MacBook display."
             return
@@ -175,12 +238,12 @@ final class AppModel: ObservableObject {
         captureTask = Task { [weak self] in
             guard let self else { return }
             do {
-                let image = try await DesktopCapture.snapshot(screen: screen)
+                let shots = try await DesktopCapture.snapshotAll()
                 guard !Task.isCancelled, self.gestureID == id,
                       self.sessionAvailable, self.automaticEnabled,
                       self.gate.state == .captureRequested else { return }
                 self.smoothedAngle = self.sensorAngle ?? self.tuning.workingAngle
-                try self.overlay.show(image: image, screen: screen, angle: self.smoothedAngle, tuning: self.tuning)
+                try self.overlay.show(shots: shots, angle: self.smoothedAngle, tuning: self.tuning)
                 self.gate.captured()
                 self.isBusy = false
                 self.captureTask = nil
@@ -215,43 +278,103 @@ final class AppModel: ObservableObject {
         }
     }
 
-    func playDesktopDemo() {
+    // MARK: Apply and cancel
+
+    /// True whenever something is on screen, or about to be, that Cancel would clear.
+    ///
+    /// Covers the armed lid gesture too: with lid-follow on there is nothing on screen yet, but
+    /// closing the lid would put it there, and "Cancel" has to mean "and stay off".
+    var effectOnScreen: Bool { screenSaverActive || isBusy || automaticEnabled }
+
+    /// Switches the effect on.
+    ///
+    /// With a readable hinge sensor this arms the lid gesture: the screen stays exactly as it is
+    /// while the lid is open, folds as the lid closes, and unfolds again as it reopens. It does
+    /// NOT fold the desktop immediately — an effect that blurs a fully open screen is the thing
+    /// people report as broken. Without a sensor there is no gesture to arm, so it falls back to
+    /// folding and holding, which is the only thing such a Mac can show.
+    func applyToDesktop() {
+        guard sensorAngle != nil else {
+            startScreenSaver()
+            return
+        }
+        automaticEnabled = true
+    }
+
+    /// Clears the effect and stops it coming back — including the lid gesture, so cancelling
+    /// cannot be undone a second later by the lid drifting a few degrees.
+    func cancelEffect() {
+        let had = effectOnScreen
+        pause()
+        message = had ? "Cancelled. Your desktop is back." : "Nothing to cancel."
+    }
+
+    // MARK: Screen saver
+
+    /// Folds the desktop and HOLDS it there until the user dismisses it.
+    ///
+    /// The four-second preview answers "what does this look like?"; this answers "leave it up".
+    /// It eases down to the resting angle and then stays, so any key, click or real mouse
+    /// movement brings the desktop back — the interaction people already expect from a screen
+    /// saver.
+    func startScreenSaver() {
         guard sessionAvailable else { return }
         automaticEnabled = false
         cancelGesture()
         captureAllowed = DesktopCapture.isAllowed
         guard captureAllowed else { requestCaptureAccess(); return }
-        guard let screen = DesktopCapture.builtInScreen() ?? NSScreen.main else { return }
         let id = UUID()
         gestureID = id
         isBusy = true
-        message = "Playing a four-second desktop preview. It clears automatically."
+        message = "Folding the desktop. Move the mouse or press a key to bring it back."
         captureTask = Task { [weak self] in
             guard let self else { return }
             do {
-                let image = try await DesktopCapture.snapshot(screen: screen)
+                let shots = try await DesktopCapture.snapshotAll()
                 guard !Task.isCancelled, self.gestureID == id, self.sessionAvailable else { return }
-                try self.overlay.show(image: image, screen: screen, angle: self.tuning.workingAngle, tuning: self.tuning)
+                try self.overlay.show(shots: shots, angle: self.tuning.workingAngle, tuning: self.tuning,
+                                      onDismiss: { [weak self] in self?.stopScreenSaver() })
                 self.captureTask = nil
+                self.screenSaverActive = true
+
                 let began = Date.timeIntervalSinceReferenceDate
-                self.renderTimer = self.mainTimer(every: 1.0 / 60) { [weak self] in
-                    guard let self else { return }
+                let settle = 2.5
+                let resting = max(self.tuning.fadeAngle + 6, 30.0)
+                self.screenSaverTimer = self.mainTimer(every: 1.0 / 60) { [weak self] in
+                    guard let self, self.screenSaverActive else { return }
                     let elapsed = Date.timeIntervalSinceReferenceDate - began
-                    guard elapsed < 4 else {
-                        self.cancelGesture()
-                        self.message = "Desktop preview finished."
+                    if elapsed >= settle {
+                        // Held, not finished: the overlay stays until dismissed.
+                        self.overlay.update(angle: resting, tuning: self.tuning)
                         return
                     }
-                    let fold = 0.5 - 0.5 * cos(elapsed / 4 * 2 * .pi)
-                    let angle = self.tuning.workingAngle - (self.tuning.workingAngle - 36) * fold
-                    self.overlay.update(angle: angle, tuning: self.tuning)
+                    // Ease out, so it comes to rest rather than stopping dead.
+                    let t = elapsed / settle
+                    let eased = 1 - pow(1 - t, 3)
+                    self.overlay.update(angle: self.tuning.workingAngle
+                        - (self.tuning.workingAngle - resting) * eased, tuning: self.tuning)
                 }
+
+                // Arm dismissal only after the opening move, so the pointer still travelling from
+                // the click that started it does not close it immediately.
+                try? await Task.sleep(nanoseconds: 700_000_000)
+                guard self.gestureID == id, self.screenSaverActive else { return }
+                self.overlay.armDismissal()
             } catch {
                 guard self.gestureID == id else { return }
-                self.cancelGesture()
+                self.stopScreenSaver()
                 self.message = error.localizedDescription
             }
         }
+    }
+
+    func stopScreenSaver() {
+        let wasActive = screenSaverActive
+        screenSaverActive = false
+        screenSaverTimer?.invalidate()
+        screenSaverTimer = nil
+        cancelGesture()
+        if wasActive { message = "Desktop restored." }
     }
 
     func cancelGesture() {
@@ -267,6 +390,9 @@ final class AppModel: ObservableObject {
 
     func pause() {
         automaticEnabled = false
+        screenSaverActive = false
+        screenSaverTimer?.invalidate()
+        screenSaverTimer = nil
         stopPreview()
         cancelGesture()
         message = "Paused. Your desktop is clear."
@@ -307,7 +433,9 @@ final class AppModel: ObservableObject {
         }
         observe(.default, NSApplication.didChangeScreenParametersNotification) { [weak self] in self?.pause() }
         observe(.default, NSApplication.didBecomeActiveNotification) { [weak self] in
+            // Coming back from System Settings is exactly when a grant changes under the app.
             self?.captureAllowed = DesktopCapture.isAllowed
+            self?.refreshStatus()
         }
         // Additional best-effort lock signals; window level remains below the secure login UI.
         observe(DistributedNotificationCenter.default(), Notification.Name("com.apple.screenIsLocked")) { [weak self] in self?.suspend() }
