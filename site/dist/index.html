@@ -75,7 +75,7 @@
         "step": [
           { "@type": "HowToStep", "name": "Unzip and open a terminal", "text": "Unzip Still-source.zip and run: cd ~/Downloads/Still-source" },
           { "@type": "HowToStep", "name": "Check the developer tools", "text": "Run xcode-select -p. If it errors, run xcode-select --install and wait for it to finish." },
-          { "@type": "HowToStep", "name": "Build", "text": "Run bash native/scripts/build.sh. Tests run first, then a release build of Still.app." },
+          { "@type": "HowToStep", "name": "Build", "text": "Run bash native/scripts/build.sh. Tests run if full Xcode is installed, then a release build of Still.app." },
           { "@type": "HowToStep", "name": "Open the app", "text": "Run open native/build/Still.app. The preview window needs no permissions." },
           { "@type": "HowToStep", "name": "Allow Screen Recording", "text": "In the Your Mac tab click Allow, switch Still on in System Settings, and reopen the app if asked. Note whether the lid sensor was found." },
           { "@type": "HowToStep", "name": "Try it", "text": "Click Preview on desktop. If the sensor was found, click Use current lid, switch on Follow lid, and close the lid slowly." }
@@ -171,12 +171,12 @@
       <ol class="steps">
         <li><h3>Unzip and open a terminal there</h3><p>Double-click <code>Still-source.zip</code> in Downloads, then in Terminal:</p><pre><code>cd ~/Downloads/Still-source</code></pre></li>
         <li><h3>Check the developer tools</h3><p>You need Apple's command line tools, not full Xcode.</p><pre><code>xcode-select -p</code></pre><p>If that prints a path you're set. If it errors, run <code>xcode-select --install</code>, click Install, wait a few minutes, then carry on.</p></li>
-        <li><h3>Build</h3><pre><code>bash native/scripts/build.sh</code></pre><p>Tests run first, then a release build. Red text at this stage is a compile error: paste it into an issue.</p></li>
+        <li><h3>Build</h3><pre><code>bash native/scripts/build.sh</code></pre><p>With full Xcode installed the tests run first. With only the Command Line Tools the script says it's skipping them (XCTest ships inside Xcode) and builds the app anyway. Red text after that is a compile error: paste it into an issue.</p></li>
         <li><h3>Open the app</h3><pre><code>open native/build/Still.app</code></pre><p>The Still window appears with the slider preview. That part needs no permissions. Still also lives in the menu bar; the icon is a tilted rectangle.</p></li>
         <li><h3>Allow Screen Recording and read the sensor line</h3><p>In the <strong>Your Mac</strong> tab, click <strong>Allow</strong>. macOS opens System Settings; switch Still on, then quit and reopen the app if it asks. The line above it says either "Lid sensor available" with a live angle, or "No readable lid-angle sensor". Note the model identifier under it, something like <code>Mac15,3</code>.</p></li>
         <li><h3>Try it</h3><p>Click <strong>Preview on desktop</strong> for a four-second run on your real desktop. If the sensor was found, click <strong>Use current lid</strong> while sitting normally, switch on <strong>Follow lid</strong>, and close the lid slowly. Open it back up and the effect clears.</p></li>
       </ol>
-      <p class="fineprint">Built locally, so Gatekeeper won't complain; it's signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds.</p>
+      <p class="fineprint">If Terminal says "Operation not permitted" inside Downloads, macOS is blocking it from that folder: allow Terminal under Privacy &amp; Security → Files and Folders, or move the folder to your home directory first. Built locally, so Gatekeeper won't complain; it's signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds.</p>
     </section>
   </main>
   <footer class="shell"><a class="footer-logo" href="#">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>

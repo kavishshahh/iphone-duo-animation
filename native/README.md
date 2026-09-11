@@ -23,7 +23,7 @@ Needs macOS 14 or later and an Apple Silicon Mac. No Xcode project and no Apple 
    ```sh
    bash native/scripts/build.sh
    ```
-   Tests run first, then a release build. Red text here is a compile error: paste it into an issue.
+   With full Xcode installed the geometry tests run first; with only the Command Line Tools the script says it's skipping them (XCTest ships inside Xcode) and goes straight to the release build. Red text after that is a compile error: paste it into an issue.
 4. **Open the app.**
    ```sh
    open native/build/Still.app
@@ -32,7 +32,7 @@ Needs macOS 14 or later and an Apple Silicon Mac. No Xcode project and no Apple 
 5. **Allow Screen Recording and read the sensor line.** In the **Your Mac** tab click **Allow**. macOS opens System Settings; switch Still on, then quit and reopen the app if it asks. The line above says either "Lid sensor available" with a live angle, or "No readable lid-angle sensor". Note the model identifier under it (for example `Mac15,3`).
 6. **Try it.** Click **Preview on desktop** for a four-second run on your real desktop. If the sensor was found, click **Use current lid** while sitting normally, switch on **Follow lid**, and close the lid slowly. Open it back up and the effect clears.
 
-Built locally, so Gatekeeper won't complain; the app is signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds. The M1 Air and every 13-inch MacBook Pro have no lid sensor: on those, step 6 stops at the desktop preview.
+If Terminal says "Operation not permitted" inside Downloads, macOS is blocking it from that folder: allow Terminal under Privacy & Security → Files and Folders, or move the folder to your home directory first. Built locally, so Gatekeeper won't complain; the app is signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds. The M1 Air and every 13-inch MacBook Pro have no lid sensor: on those, step 6 stops at the desktop preview.
 
 Use the Still menu bar item to pause or quit. Escape clears the effect while Still's window has keyboard focus; it is intentionally not a system-wide keyboard hook. A detected sensor is capability evidence, not a guarantee for every model or OS.
 
