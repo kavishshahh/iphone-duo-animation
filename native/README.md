@@ -6,30 +6,35 @@ Still adds a perspective-and-frost effect to a temporary desktop snapshot. It in
 
 The fastest way to get a first compile without a Mac at hand is to push this folder to GitHub: `.github/workflows/mac-build.yml` runs the tests and builds `Still.app` on a macOS runner and attaches it as a downloadable artifact.
 
-## Build on your Mac
+## Get started on your Mac
 
-Requires macOS 14+, Xcode 15+ or its Command Line Tools, and an Apple Silicon Mac. The Swift package can also target Intel, but Intel support is untested.
+Needs macOS 14 or later and an Apple Silicon Mac. No Xcode project and no Apple developer account. If any step fails, open an issue with the full terminal output and your model identifier.
 
-1. Download and unzip the source archive.
-2. In Terminal, enter the extracted folder.
-3. Run:
+1. **Unzip and open a terminal there.** Double-click `Still-source.zip` in Downloads (or clone the repo), then:
+   ```sh
+   cd ~/Downloads/Still-source
+   ```
+2. **Check the developer tools.** You need Apple's command line tools, not full Xcode.
+   ```sh
+   xcode-select -p
+   ```
+   If that prints a path you're set. If it errors, run `xcode-select --install`, click Install, wait a few minutes, then carry on.
+3. **Build.**
+   ```sh
+   bash native/scripts/build.sh
+   ```
+   Tests run first, then a release build. Red text here is a compile error: paste it into an issue.
+4. **Open the app.**
+   ```sh
+   open native/build/Still.app
+   ```
+   The Still window appears with the slider preview, which needs no permissions. Still also sits in the menu bar (a tilted rectangle icon).
+5. **Allow Screen Recording and read the sensor line.** In the **Your Mac** tab click **Allow**. macOS opens System Settings; switch Still on, then quit and reopen the app if it asks. The line above says either "Lid sensor available" with a live angle, or "No readable lid-angle sensor". Note the model identifier under it (for example `Mac15,3`).
+6. **Try it.** Click **Preview on desktop** for a four-second run on your real desktop. If the sensor was found, click **Use current lid** while sitting normally, switch on **Follow lid**, and close the lid slowly. Open it back up and the effect clears.
 
-```sh
-bash native/scripts/build.sh
-open native/build/Still.app
-```
+Built locally, so Gatekeeper won't complain; the app is signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds. The M1 Air and every 13-inch MacBook Pro have no lid sensor: on those, step 6 stops at the desktop preview.
 
-If developer tools are missing, run `xcode-select --install` first. You can also double-click `Build Still.command` after macOS permits it. The build script runs the core tests before producing `native/build/Still.app`. No paid Apple Developer account is needed for this local build.
-
-## Try it
-
-- Use the slider or Play in the preview window. No capture permission is needed.
-- Choose **Your Mac → Allow** for Screen Recording, following any restart prompt from macOS.
-- Choose **Preview on desktop** to play one four-second snapshot animation. It clears automatically.
-- On a compatible laptop, set your normal working angle and turn on **Follow lid**.
-- Use the Still menu bar item to pause or quit. Escape clears the effect while Still's window has keyboard focus; it is intentionally not a system-wide keyboard hook.
-
-The M1 Air and 13-inch M1/M2 MacBook Pro do not have the required sensor according to current community hardware research. Their manual preview remains usable. A detected sensor is capability evidence, not a guarantee for every model or OS.
+Use the Still menu bar item to pause or quit. Escape clears the effect while Still's window has keyboard focus; it is intentionally not a system-wide keyboard hook. A detected sensor is capability evidence, not a guarantee for every model or OS.
 
 ## Prototype limits
 
@@ -65,7 +70,7 @@ The web demo shares the projection math. `node --test site/test/*.test.mjs` runs
 - `FoldCore`: pure projection, smoothing and gesture state.
 - `LidSensor`: serial background HID reads, invalid report rejection.
 - `DesktopCapture`: ScreenCaptureKit screenshot; Still is excluded.
-- `FoldSurface`: on-demand Metal rendering with mipmap-based progressive frost.
+- `FoldSurface`: on-demand Metal rendering; twelve-tap Poisson frost over a mip prefilter, with glow and dark-glass edge.
 - `AppModel`: capture cancellation, stale-result guards, sensor timeout and power/session cleanup.
 
 The mathematical implementation and app code are original. The HID report layout follows the documented findings of [Sam Henri Gold's LidAngleSensor](https://github.com/samhenrigold/LidAngleSensor). No code from the unlicensed macTilt repository has been included. The wallpaper was generated specifically for this project.

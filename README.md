@@ -6,14 +6,33 @@ Website and interactive demo: https://still.akki.dev
 
 **Status:** early prototype. The code is written and the geometry is unit tested, but it has not been exercised on real Macs yet. It needs people with sensor-equipped MacBooks (14/16-inch Pro from 2021, Air from M2) to run it and report back. Open an issue with your model identifier and what the "Your Mac" tab says.
 
-## Build
+## Get started on your Mac
 
-macOS 14+, Xcode Command Line Tools, Apple Silicon.
+Needs macOS 14 or later and an Apple Silicon Mac. No Xcode project and no Apple developer account. If any step fails, open an issue with the full terminal output and your model identifier.
 
-```sh
-bash native/scripts/build.sh
-open native/build/Still.app
-```
+1. **Unzip and open a terminal there.** Double-click `Still-source.zip` in Downloads (or clone the repo), then:
+   ```sh
+   cd ~/Downloads/Still-source
+   ```
+2. **Check the developer tools.** You need Apple's command line tools, not full Xcode.
+   ```sh
+   xcode-select -p
+   ```
+   If that prints a path you're set. If it errors, run `xcode-select --install`, click Install, wait a few minutes, then carry on.
+3. **Build.**
+   ```sh
+   bash native/scripts/build.sh
+   ```
+   Tests run first, then a release build. Red text here is a compile error: paste it into an issue.
+4. **Open the app.**
+   ```sh
+   open native/build/Still.app
+   ```
+   The Still window appears with the slider preview, which needs no permissions. Still also sits in the menu bar (a tilted rectangle icon).
+5. **Allow Screen Recording and read the sensor line.** In the **Your Mac** tab click **Allow**. macOS opens System Settings; switch Still on, then quit and reopen the app if it asks. The line above says either "Lid sensor available" with a live angle, or "No readable lid-angle sensor". Note the model identifier under it (for example `Mac15,3`).
+6. **Try it.** Click **Preview on desktop** for a four-second run on your real desktop. If the sensor was found, click **Use current lid** while sitting normally, switch on **Follow lid**, and close the lid slowly. Open it back up and the effect clears.
+
+Built locally, so Gatekeeper won't complain; the app is signed ad hoc on your own machine. That also means macOS forgets the Screen Recording permission after each rebuild, which is normal for unsigned dev builds. The M1 Air and every 13-inch MacBook Pro have no lid sensor: on those, step 6 stops at the desktop preview.
 
 See [`native/README.md`](native/README.md) for how it works, its limits, and what still needs testing. The GitHub Actions workflow builds `Still.app` on every push and attaches it as an artifact.
 
