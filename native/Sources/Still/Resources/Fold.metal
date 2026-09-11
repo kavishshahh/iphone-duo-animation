@@ -22,6 +22,9 @@ constant float2 kTaps[12] = {
     float2( 0.507, 0.064), float2( 0.896, 0.412), float2(-0.322,-0.933), float2(-0.792,-0.598)
 };
 
+// Metal has no radians(); that is a GLSL function.
+static inline float deg2rad(float degrees) { return degrees * (M_PI_F / 180.0f); }
+
 static float hash21(float2 q) { return fract(sin(dot(q, float2(12.9898, 78.233))) * 43758.5453); }
 
 static float3 frosted(texture2d<float> picture, sampler s, float2 uv, float radius, float lod, float aspect, float seed) {
@@ -49,8 +52,8 @@ fragment float4 foldFragment(VertexOut in [[stage_in]],
     float2 uv = in.uv;
     float angle = clamp(t.angle, 0.0, t.workingAngle);
     float progress = clamp((t.workingAngle-angle)/(t.workingAngle-t.fadeAngle), 0.0, 1.0);
-    float a = radians(angle);
-    float w = radians(t.workingAngle);
+    float a = deg2rad(angle);
+    float w = deg2rad(t.workingAngle);
     float3 eye = float3(0, 2.3, 2.6);
     float3 point = float3((uv.x-.5)*t.aspect, (1-uv.y)*sin(a), (1-uv.y)*cos(a));
     float3 normal = float3(0, cos(w), -sin(w));
