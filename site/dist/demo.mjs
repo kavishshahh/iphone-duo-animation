@@ -16,6 +16,20 @@ uniform float frost;
 uniform float shade;
 uniform float effect;
 varying vec2 screenUV;
+// Poisson disc, unit radius. Rotated per pixel so twelve taps read as smooth glass.
+const vec2 TAPS[12] = vec2[12](
+  vec2(-0.326,-0.406), vec2(-0.840,-0.074), vec2(-0.696, 0.457), vec2(-0.203, 0.621),
+  vec2( 0.962,-0.195), vec2( 0.473,-0.480), vec2( 0.519, 0.767), vec2( 0.185,-0.893),
+  vec2( 0.507, 0.064), vec2( 0.896, 0.412), vec2(-0.322,-0.933), vec2(-0.792,-0.598));
+float hash(vec2 q){ return fract(sin(dot(q, vec2(12.9898,78.233))) * 43758.5453); }
+vec3 frosted(vec2 s, float radius, float lod, float seed){
+  float a = seed * 6.2831853;
+  mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
+  vec2 scale = vec2(radius / 1.6, radius);
+  vec3 sum = vec3(0.0);
+  for (int i = 0; i < 12; i++) sum += textureLod(picture, s + (rot * TAPS[i]) * scale, lod).rgb;
+  return sum / 12.0;
+}
 void main() {
   vec2 uv=screenUV;
   float degrees=clamp(angle,0.0,workingAngle);
@@ -30,15 +44,27 @@ void main() {
   vec2 projected=vec2(ref.x/1.6+.5,1.0-dot(ref,vec3(0.0,sin(w),cos(w))));
   float easing=smoothstep(0.0,7.0,workingAngle-degrees)*effect;
   vec2 source=mix(uv,projected,perspective*easing);
-  float inside=step(0.0,source.x)*step(source.x,1.0)*step(0.0,source.y)*step(source.y,1.0)*step(0.0,ray);
-  float edgeDistance=min(min(source.x,1.0-source.x),min(source.y,1.0-source.y));
-  float feather=mix(1.0,smoothstep(0.0,.009,edgeDistance),easing);
-  float blur=frost*smoothstep(.05,.9,p)*(1.5+4.8*(1.0-uv.y));
-  vec3 col=textureLod(picture,vec2(source.x,1.0-source.y),blur).rgb;
+  // How far the projected point falls outside the picture (0 inside).
+  float outside=max(max(-source.x,source.x-1.0),max(-source.y,source.y-1.0));
+  outside=max(outside, step(ray,0.0));
+  vec2 s=vec2(source.x,1.0-source.y);
+  // Frost: blur radius grows with progress and toward the top of the panel.
+  // Comes in early: clearly soft by 90°, heavy by 70°, like Bendy.
+  float soft=smoothstep(0.0,.5,p);
+  float radius=frost*soft*(.016+.05*(1.0-uv.y));
+  float lod=clamp(log2(max(radius*1000.0,1.0))-.35,0.0,5.5);
+  vec3 col=frosted(s,radius,lod,hash(gl_FragCoord.xy));
+  // Glow: bright content bleeds into a soft halo, like light through frosted glass.
+  vec3 haze=textureLod(picture,s,6.0).rgb;
+  col+=haze*haze*(.6*frost*soft);
+  col=mix(col,vec3(.64,.76,.94),frost*p*.06);
+  // Shade toward the top as the lid comes down; fade, never cut, where the picture ends.
   col*=1.0-shade*p*(.25+.60*pow(1.0-uv.y,2.0));
-  col=mix(col,vec3(.64,.76,.94),frost*p*.035);
+  // Past the picture's edge the panel reads as dark glass, not a stretched top row.
+  vec3 glass=vec3(.075,.085,.11)*(1.0-.55*p);
+  col=mix(col,glass,smoothstep(0.0,.06+.08*p,outside));
   float fade=mix(1.0,smoothstep(18.0,30.0,degrees),effect);
-  col*=inside*feather*fade;
+  col*=fade;
   // Rounded display mask.
   vec2 q=abs(uv-.5)-vec2(.483,.474);
   if(length(max(q,0.0))+min(max(q.x,q.y),0.0)>.018) discard;
