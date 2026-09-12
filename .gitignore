@@ -5,3 +5,4 @@ native/build/
 node_modules/
 artwork/
 native/.signing-identity
+ruvector.db

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>The Still blog | MacBook lids, screensavers and desktop effects</title>
+  <meta name="description" content="Guides to the MacBook lid angle sensor, clamshell mode, Mac screensavers and keeping your Mac awake — written while building Still, an open source lid animation for macOS.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="author" content="Akshay Sharma">
+  <link rel="canonical" href="https://iphoneduoanimation.com/blog/">
+  <meta property="og:url" content="https://iphoneduoanimation.com/blog/">
+  <meta property="og:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Still">
+  <meta property="og:title" content="The Still blog | MacBook lids, screensavers and desktop effects">
+  <meta property="og:description" content="Guides to the MacBook lid angle sensor, clamshell mode, Mac screensavers and keeping your Mac awake.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Still blog | MacBook lids, screensavers and desktop effects">
+  <meta name="twitter:description" content="Guides to the MacBook lid angle sensor, clamshell mode, Mac screensavers and keeping your Mac awake.">
+  <meta name="twitter:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Blog",
+        "@id": "https://iphoneduoanimation.com/blog/#blog",
+        "url": "https://iphoneduoanimation.com/blog/",
+        "name": "The Still blog",
+        "description": "Guides to the MacBook lid angle sensor, clamshell mode, Mac screensavers and desktop effects.",
+        "publisher": { "@type": "Person", "name": "Akshay Sharma", "url": "https://akki.dev" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Still", "item": "https://iphoneduoanimation.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://iphoneduoanimation.com/blog/" }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#posts">Skip to the articles</a>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Main navigation">
+      <a class="wordmark" href="/" aria-label="Still home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7h16v18H7z" fill="none" stroke="currentColor" stroke-width="1.8" rx="3"/><path d="m7 7 12 4v18L7 25Z" fill="#f5f5f7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>still<span class="wordmark-dot">.</span></a>
+      <div class="nav-links"><a href="/#demo">The effect</a><a href="/#how">How it works</a><a href="/#compatibility">Which Macs</a><a href="/#install">Install</a><a href="/blog/">Blog</a></div>
+      <a class="nav-cta" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main>
+    <section class="post-head shell">
+      <p class="breadcrumb"><a href="/">Still</a> → Blog</p>
+      <p class="eyebrow" style="margin-top:22px">WRITING</p>
+      <h1>Notes from inside the hinge.</h1>
+      <p class="post-lede">Still reads the lid angle sensor in a MacBook hinge thirty times a second. Building that meant learning a lot about how macOS handles lids, sleep, screensavers and screen capture — most of it badly documented. These are the guides I wanted while writing it.</p>
+    </section>
+
+    <section class="shell" id="posts" style="max-width:1000px;padding-bottom:90px">
+      <div class="card-grid">
+        <a class="card" href="/blog/macbook-lid-angle-sensor/">
+          <h3>The MacBook lid angle sensor, explained</h3>
+          <p>Which Macs have one, what it actually reports, and how to read it yourself over IOKit HID. Includes working Swift.</p>
+          <span class="card-meta">Guide · 9 min read</span>
+        </a>
+        <a class="card" href="/blog/macbook-clamshell-mode/">
+          <h3>MacBook clamshell mode: the complete guide</h3>
+          <p>Running a MacBook with the lid shut and an external display — what Apple requires, what it does to thermals, and the myths worth ignoring.</p>
+          <span class="card-meta">Guide · 8 min read</span>
+        </a>
+        <a class="card" href="/blog/stop-macbook-sleeping-lid-closed/">
+          <h3>How to stop a MacBook from sleeping</h3>
+          <p>Six ways, from a one-line terminal command to a lid-closed setup that survives a reboot. No third-party app required.</p>
+          <span class="card-meta">How-to · 7 min read</span>
+        </a>
+        <a class="card" href="/blog/best-free-mac-screensavers/">
+          <h3>The best free Mac screensavers</h3>
+          <p>Aerial, Fliqlo, Brooklyn and the built-in ones worth using — tested on macOS 26, with the security settings people forget.</p>
+          <span class="card-meta">Roundup · 10 min read</span>
+        </a>
+        <a class="card" href="/blog/minimal-clock-screensaver-mac/">
+          <h3>Minimal clock screensavers for Mac</h3>
+          <p>Fliqlo made the flip clock famous. Here is what still works on Apple Silicon, and what to use now that Flash is gone.</p>
+          <span class="card-meta">Roundup · 6 min read</span>
+        </a>
+        <a class="card" href="/blog/screencapturekit-single-screenshot/">
+          <h3>Taking one screenshot with ScreenCaptureKit</h3>
+          <p>Why a single still image needs the Screen Recording permission, and how to capture every display in one pass. With Swift.</p>
+          <span class="card-meta">Development · 8 min read</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="download-section shell">
+      <p class="eyebrow">THE APP</p>
+      <h2>Still folds your desktop<br>as the lid comes down.</h2>
+      <p>Free, MIT licensed, and it never sends anything anywhere. Works on any MacBook with a lid angle sensor.</p>
+      <div class="hero-actions"><a class="button primary" href="/#demo">Try the fold <span aria-hidden="true">→</span></a><a class="text-link" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">View the source <span aria-hidden="true">↗</span></a></div>
+    </section>
+  </main>
+  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
+</body>
+</html>

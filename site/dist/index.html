@@ -90,7 +90,7 @@
   <header class="site-header">
     <nav class="nav shell" aria-label="Main navigation">
       <a class="wordmark" href="#" aria-label="Still home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7h16v18H7z" fill="none" stroke="currentColor" stroke-width="1.8" rx="3"/><path d="m7 7 12 4v18L7 25Z" fill="#f5f5f7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>still<span class="wordmark-dot">.</span></a>
-      <div class="nav-links"><a href="#demo">The effect</a><a href="#how">How it works</a><a href="#compatibility">Which Macs</a><a href="#install">Install</a><a href="#faq">FAQ</a></div>
+      <div class="nav-links"><a href="#demo">The effect</a><a href="#how">How it works</a><a href="#compatibility">Which Macs</a><a href="#install">Install</a><a href="/blog/">Blog</a></div>
       <a class="nav-cta" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
@@ -122,7 +122,7 @@
       <p class="eyebrow">HOW IT WORKS</p>
       <h2>A snapshot, a hinge angle,<br><span>and one Metal shader.</span></h2>
       <div class="prose-columns">
-        <p>Newer MacBooks have a lid angle sensor in the hinge. Still reads it over IOKit HID about 30 times a second. Nothing happens while you work; the app sits in the menu bar and waits for the lid to drop about 4° below the angle you normally sit at.</p>
+        <p>Newer MacBooks have a <a href="/blog/macbook-lid-angle-sensor/">lid angle sensor in the hinge</a>. Still reads it over IOKit HID about 30 times a second. Nothing happens while you work; the app sits in the menu bar and waits for the lid to drop about 4° below the angle you normally sit at.</p>
         <p>When it does, Still grabs a single ScreenCaptureKit snapshot of the built-in display and puts it on a borderless overlay. A Metal shader then does the trick Apple's foldable does: it projects that picture back onto the plane your screen was in a moment ago, from where you're sitting, so the desktop looks like it stays put while the glass moves over it. As the lid comes down the picture frosts over and the top shades to dark glass.</p>
         <p>Open the lid back up and the overlay is gone, snapshot discarded. It never captures video or audio, never writes anything to disk, and makes no network requests. You'll still see macOS's Screen Recording indicator, because that's the permission the snapshot API lives under.</p>
       </div>

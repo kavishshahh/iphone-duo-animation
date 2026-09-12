@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>The MacBook lid angle sensor, explained (and how to read it)</title>
+  <meta name="description" content="Which MacBooks have a lid angle sensor, what it reports, and how to read the hinge angle yourself in Swift over IOKit HID. Tested on a MacBook Pro M3 Pro.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="author" content="Akshay Sharma">
+  <link rel="canonical" href="https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
+  <meta property="og:url" content="https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
+  <meta property="og:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Still">
+  <meta property="og:title" content="The MacBook lid angle sensor, explained (and how to read it)">
+  <meta property="og:description" content="Which MacBooks have a lid angle sensor, what it reports, and how to read the hinge angle yourself in Swift.">
+  <meta property="article:published_time" content="2026-09-12">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The MacBook lid angle sensor, explained">
+  <meta name="twitter:description" content="Which MacBooks have one, what it reports, and how to read it in Swift.">
+  <meta name="twitter:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "The MacBook lid angle sensor, explained (and how to read it)",
+        "description": "Which MacBooks have a lid angle sensor, what it reports, and how to read the hinge angle yourself in Swift over IOKit HID.",
+        "url": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
+        "datePublished": "2026-09-12",
+        "dateModified": "2026-09-12",
+        "image": "https://iphoneduoanimation.com/assets/og.png",
+        "author": { "@type": "Person", "name": "Akshay Sharma", "url": "https://akki.dev" },
+        "publisher": { "@type": "Person", "name": "Akshay Sharma" },
+        "mainEntityOfPage": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
+        "proficiencyLevel": "Intermediate",
+        "keywords": "lid angle sensor, macbook lid angle sensor, IOKit HID, macOS development"
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Still", "item": "https://iphoneduoanimation.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://iphoneduoanimation.com/blog/" },
+          { "@type": "ListItem", "position": 3, "name": "The MacBook lid angle sensor", "item": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Which MacBooks have a lid angle sensor?", "acceptedAnswer": { "@type": "Answer", "text": "The 16-inch MacBook Pro from 2019 onward, all 14-inch and 16-inch MacBook Pro models from 2021, and the MacBook Air from the M2 in 2022. The M1 Air and every 13-inch MacBook Pro do not have one." } },
+          { "@type": "Question", "name": "What does the MacBook lid angle sensor report?", "acceptedAnswer": { "@type": "Answer", "text": "A hinge angle in degrees, roughly 0 when shut and about 130 to 135 when fully open. It is exposed as HID feature report 1 on Apple vendor ID 0x05AC, product 0x8104, usage page 0x20, usage 0x8A." } },
+          { "@type": "Question", "name": "Does reading the lid angle sensor need special permission?", "acceptedAnswer": { "@type": "Answer", "text": "No. Reading the sensor over IOKit HID needs no TCC permission on macOS. Capturing the screen does, but the hinge angle itself does not." } }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to the article</a>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Main navigation">
+      <a class="wordmark" href="/" aria-label="Still home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7h16v18H7z" fill="none" stroke="currentColor" stroke-width="1.8" rx="3"/><path d="m7 7 12 4v18L7 25Z" fill="#f5f5f7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>still<span class="wordmark-dot">.</span></a>
+      <div class="nav-links"><a href="/#demo">The effect</a><a href="/#how">How it works</a><a href="/#compatibility">Which Macs</a><a href="/blog/">Blog</a></div>
+      <a class="nav-cta" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main>
+    <article>
+    <div class="post-head shell">
+      <p class="breadcrumb"><a href="/">Still</a> → <a href="/blog/">Blog</a> → Lid angle sensor</p>
+      <h1>The MacBook lid angle sensor, explained</h1>
+      <div class="post-meta"><time datetime="2026-09-12">12 September 2026</time><span>·</span><span>9 min read</span><span>·</span><span>By Akshay Sharma</span></div>
+    </div>
+
+    <div class="post-body shell" id="article">
+      <p class="post-lede">Most MacBooks sold since 2021 contain a sensor almost nobody uses: a magnetometer in the hinge that reports, continuously, exactly how far open the lid is. macOS reads it to decide when to sleep. Almost nothing else does.</p>
+
+      <div class="post-toc">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#what">What the sensor actually is</a></li>
+          <li><a href="#which">Which MacBooks have one</a></li>
+          <li><a href="#reports">What it reports</a></li>
+          <li><a href="#read">Reading it yourself in Swift</a></li>
+          <li><a href="#gotchas">Four gotchas that cost me a day</a></li>
+          <li><a href="#uses">What you can build with it</a></li>
+        </ol>
+      </div>
+
+      <h2 id="what">What the sensor actually is</h2>
+      <p>It is not a switch. Every laptop ever made has a closed-lid switch — usually a Hall effect sensor that trips when a magnet in the display comes near a sensor in the base. That gives you one bit: open or shut.</p>
+      <p>The lid angle sensor is different. It reports a <strong>continuous angle</strong>, updated many times a second, across the full range of the hinge. Apple appears to use it for graceful sleep timing and for the "closing the lid while a file is saving" behaviour, but it is exposed to userspace as an ordinary HID device, which means anything running on your Mac can read it.</p>
+      <p>That distinction matters enormously if you want to build something with it. A switch can only trigger an event. An angle can drive an animation.</p>
+
+      <h2 id="which">Which MacBooks have one</h2>
+      <p>Apple has never documented this, so the list below comes from community testing — chiefly the work around <a href="https://github.com/samhenrigold/LidAngleSensor" rel="noopener nofollow">Sam Henri Gold's LidAngleSensor</a>, which is where the report format below was first worked out.</p>
+      <div class="table-wrap">
+        <table class="compat">
+          <caption>Lid angle sensor by model, as of September 2026</caption>
+          <thead><tr><th scope="col">Model</th><th scope="col">Sensor</th></tr></thead>
+          <tbody>
+            <tr><td>MacBook Pro 14" and 16", 2021 onward (M1 Pro/Max through M4)</td><td><span class="pill yes">Yes</span></td></tr>
+            <tr><td>MacBook Pro 16", 2019 (Intel)</td><td><span class="pill yes">Yes</span></td></tr>
+            <tr><td>MacBook Air M2 (2022), 15" M2 (2023), M4 (2025)</td><td><span class="pill yes">Yes</span></td></tr>
+            <tr><td>MacBook Air M3 (2024)</td><td><span class="pill maybe">Probably</span></td></tr>
+            <tr><td>MacBook Air M1, all 13" MacBook Pro</td><td><span class="pill no">No</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The quickest way to check your own machine is to look for the device directly. Open Terminal and run:</p>
+      <pre><code>ioreg -l -w 0 | grep -c '"ProductID" = 33028'</code></pre>
+      <p>33028 is 0x8104 in decimal. Any number above zero means the hardware is present. On my MacBook Pro (Mac15,6, M3 Pro) this returns 12, because the sensor publishes several HID interfaces and each appears more than once in the registry tree.</p>
+
+      <h2 id="reports">What it reports</h2>
+      <p>The sensor lives on Apple's vendor ID <code>0x05AC</code>, product <code>0x8104</code>. The readable interface sits on the standard HID <strong>Sensor</strong> usage page <code>0x20</code>, with usage <code>0x8A</code> (Orientation). The same product ID also publishes several vendor-specific interfaces on usage page <code>0xFF00</code> — those exist, respond to nothing useful, and are the single most common reason a first attempt at this returns nothing.</p>
+      <p>Feature report 1 gives you the angle. The layout is three bytes:</p>
+      <pre><code>byte 0   report ID (always 1)
+byte 1   angle, low byte
+byte 2   angle, high byte</code></pre>
+      <p>So the angle is a little-endian 16-bit integer in degrees. A raw read on my machine with the lid fully open returns:</p>
+      <pre><code>01 85 00   →  0x0085  =  133°</code></pre>
+      <p>Shut, it reads close to 0. Fully open on a 14-inch Pro is around 130–135°, and the hinge physically stops there. Values above about 200 are garbage and should be discarded rather than clamped — a bad read is usually a transient failure, not a real extreme angle.</p>
+
+      <h2 id="read">Reading it yourself in Swift</h2>
+      <p>No entitlement, no TCC prompt, no special permission. This is plain IOKit HID:</p>
+      <pre><code>import IOKit.hid
+
+let none = IOOptionBits(kIOHIDOptionsTypeNone)
+
+func lidAngle() -> Double? {
+    let match: [String: Any] = [
+        kIOHIDVendorIDKey as String: 0x05AC,
+        kIOHIDProductIDKey as String: 0x8104,
+        kIOHIDDeviceUsagePageKey as String: 0x20,
+        kIOHIDDeviceUsageKey as String: 0x8A
+    ]
+    let manager = IOHIDManagerCreate(kCFAllocatorDefault, none)
+    IOHIDManagerSetDeviceMatching(manager, match as CFDictionary)
+    guard IOHIDManagerOpen(manager, none) == kIOReturnSuccess else { return nil }
+    defer { IOHIDManagerClose(manager, none) }
+
+    let devices = (IOHIDManagerCopyDevices(manager) as? Set&lt;IOHIDDevice&gt;) ?? []
+    for device in devices {
+        guard IOHIDDeviceOpen(device, none) == kIOReturnSuccess else { continue }
+        defer { IOHIDDeviceClose(device, none) }
+
+        var bytes = [UInt8](repeating: 0, count: 8)
+        var count = CFIndex(bytes.count)
+        let result = IOHIDDeviceGetReport(device, kIOHIDReportTypeFeature, 1, &amp;bytes, &amp;count)
+        guard result == kIOReturnSuccess, count &gt;= 3 else { continue }
+
+        let degrees = Double(UInt16(bytes[2]) &lt;&lt; 8 | UInt16(bytes[1]))
+        guard (0...200).contains(degrees) else { continue }
+        return degrees
+    }
+    return nil
+}</code></pre>
+      <p>Note the loop. The match returns several devices and only some of them answer; you have to try each one and keep the first that produces a plausible number. Bailing out after the first failure is the second most common reason this doesn't work.</p>
+
+      <h2 id="gotchas">Four gotchas that cost me a day</h2>
+      <h3>1. The device set is unordered</h3>
+      <p><code>IOHIDManagerCopyDevices</code> returns a <code>Set</code>, so iteration order changes between runs. On one launch the readable interface comes first; on the next it comes third. Any code that assumes a position will work intermittently, which is worse than failing outright.</p>
+
+      <h3>2. Vendor-specific interfaces open successfully and then return nothing</h3>
+      <p><code>IOHIDDeviceOpen</code> succeeds on the <code>0xFF00</code> interfaces. It is <code>IOHIDDeviceGetReport</code> that fails, with <code>0xE00002C7</code>. So "did the open succeed" is not a useful test for whether you found the right device — only a successful read is.</p>
+
+      <h3>3. Other processes contend for it</h3>
+      <p>If two processes poll the sensor at once, reads start failing for both. While building Still I had a debug tool polling in a terminal and the app itself polling in the background, and spent a while convinced the app had a bug. It did not. If your reads suddenly stop, check nothing else is holding the device — and design for recovery rather than giving up permanently after N failures.</p>
+
+      <h3>4. Poll rate</h3>
+      <p>Roughly 30 Hz is plenty. The hinge is a physical object moved by a human hand; there is nothing above that rate to capture. Still polls every 33 ms and smooths the result frame-rate-independently, because raw sensor values are noisy enough to visibly jitter an animation.</p>
+      <div class="callout">
+        <p><strong>Smoothing that survives a frame rate change</strong></p>
+        <p>Use <code>current + (target − current) × (1 − exp(−rate × dt))</code> rather than a fixed lerp factor. A plain <code>lerp(current, target, 0.2)</code> per frame moves at a different speed on a 120 Hz display than on a 60 Hz one — which is exactly the kind of bug that only shows up on someone else's machine.</p>
+      </div>
+
+      <h2 id="uses">What you can build with it</h2>
+      <p>Very little uses this sensor, which is most of the fun. Things that become possible once you have a continuous angle:</p>
+      <ul>
+        <li><strong>Animations driven by the hinge.</strong> This is what <a href="/">Still</a> does — it folds, blurs and dims the desktop as the lid comes down, so closing the laptop looks like the iPhone Duo folding shut.</li>
+        <li><strong>Angle-triggered automation.</strong> Pause music below 30°, mute the mic below 45°, run a backup when the lid drops past a threshold rather than waiting for sleep.</li>
+        <li><strong>Theremin-style instruments.</strong> Map angle to pitch. Genuinely playable, entirely ridiculous.</li>
+        <li><strong>Posture and usage telemetry.</strong> How far open do you actually keep your laptop? Nobody knows this about themselves.</li>
+      </ul>
+      <p>The constraint worth designing around: the built-in display sleeps before the lid reaches 0°, so anything visual has to do its work in the range roughly between fully open and 20°. Below that, nobody is looking.</p>
+
+      <div class="post-cta">
+        <h2>Still is the sensor, put to work</h2>
+        <p>An open source menu bar app that folds your desktop as the lid comes down. MIT licensed, nothing leaves your Mac, and the sensor code above is the real thing it ships with. <a href="/">Try the interactive demo</a> or <a href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">read the source on GitHub</a>.</p>
+      </div>
+    </div>
+    </article>
+  </main>
+  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
+</body>
+</html>

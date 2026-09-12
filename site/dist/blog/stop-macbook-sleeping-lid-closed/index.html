@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>How to stop a MacBook from sleeping (lid open or closed)</title>
+  <meta name="description" content="Six ways to keep a Mac awake, from a one-line caffeinate command to a lid-closed setup that survives a reboot. No third-party app needed.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="author" content="Akshay Sharma">
+  <link rel="canonical" href="https://iphoneduoanimation.com/blog/stop-macbook-sleeping-lid-closed/">
+  <meta property="og:url" content="https://iphoneduoanimation.com/blog/stop-macbook-sleeping-lid-closed/">
+  <meta property="og:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Still">
+  <meta property="og:title" content="How to stop a MacBook from sleeping (lid open or closed)">
+  <meta property="og:description" content="Six ways to keep a Mac awake, from a one-line caffeinate command to a lid-closed setup that survives a reboot. No third-party app needed.">
+  <meta property="article:published_time" content="2026-09-12">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to stop a MacBook from sleeping (lid open or closed)">
+  <meta name="twitter:description" content="Six ways to keep a Mac awake, from a one-line caffeinate command to a lid-closed setup that survives a reboot. No third-party app needed.">
+  <meta name="twitter:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "headline": "How to stop a MacBook from sleeping",
+      "description": "Six ways to keep a Mac awake, from a one-line caffeinate command to a lid-closed setup that survives a reboot. No third-party app needed.",
+      "url": "https://iphoneduoanimation.com/blog/stop-macbook-sleeping-lid-closed/",
+      "datePublished": "2026-09-12",
+      "dateModified": "2026-09-12",
+      "image": "https://iphoneduoanimation.com/assets/og.png",
+      "author": {
+        "@type": "Person",
+        "name": "Akshay Sharma",
+        "url": "https://akki.dev"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Akshay Sharma"
+      },
+      "mainEntityOfPage": "https://iphoneduoanimation.com/blog/stop-macbook-sleeping-lid-closed/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Still",
+          "item": "https://iphoneduoanimation.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://iphoneduoanimation.com/blog/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Stop sleeping",
+          "item": "https://iphoneduoanimation.com/blog/stop-macbook-sleeping-lid-closed/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I stop my MacBook from sleeping without an app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Run caffeinate -d in Terminal to prevent display sleep, or caffeinate -s to prevent system sleep while on mains power. Quit it with Control-C. No installation is needed; caffeinate ships with macOS."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can a MacBook stay awake with the lid closed and no external display?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not through normal settings. macOS requires an external display for closed-display operation. The practical workaround is caffeinate, which keeps the system awake with the lid shut while the built-in display sleeps."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does keeping a Mac awake drain the battery?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Preventing sleep keeps the CPU and often the display powered. Use caffeinate with a timeout, such as caffeinate -t 3600, so it cannot run indefinitely by accident."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to the article</a>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Main navigation">
+      <a class="wordmark" href="/" aria-label="Still home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7h16v18H7z" fill="none" stroke="currentColor" stroke-width="1.8" rx="3"/><path d="m7 7 12 4v18L7 25Z" fill="#f5f5f7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>still<span class="wordmark-dot">.</span></a>
+      <div class="nav-links"><a href="/#demo">The effect</a><a href="/#how">How it works</a><a href="/#compatibility">Which Macs</a><a href="/blog/">Blog</a></div>
+      <a class="nav-cta" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main>
+    <article>
+    <div class="post-head shell">
+      <p class="breadcrumb"><a href="/">Still</a> → <a href="/blog/">Blog</a> → Stop sleeping</p>
+      <h1>How to stop a MacBook from sleeping</h1>
+      <div class="post-meta"><time datetime="2026-09-12">12 September 2026</time><span>·</span><span>7 min read</span><span>·</span><span>How-to</span></div>
+    </div>
+
+    <div class="post-body shell" id="article">
+      <p class="post-lede">You want a long download to finish, a render to complete, or a script to run overnight — and macOS keeps going to sleep. There are six ways to stop it, and the right one depends on whether the lid is open.</p>
+
+      <div class="post-toc">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#settings">System Settings (the obvious one)</a></li>
+          <li><a href="#caffeinate">caffeinate, the built-in command</a></li>
+          <li><a href="#lidclosed">Staying awake with the lid closed</a></li>
+          <li><a href="#pmset">pmset, for permanent changes</a></li>
+          <li><a href="#battery">What this costs you</a></li>
+        </ol>
+      </div>
+
+      <h2 id="settings">System Settings (the obvious one)</h2>
+      <p>Go to <strong>System Settings → Lock Screen</strong> and set "Turn display off when inactive" to Never. Then <strong>System Settings → Battery</strong> (or Energy Saver on a desktop) and turn on "Prevent automatic sleeping when the display is off" while on power.</p>
+      <p>This is enough for most cases and it is reversible from the same place. Its limitation is that it is a global setting: you will forget you set it, and the Mac will never sleep again until you remember.</p>
+
+      <h2 id="caffeinate">caffeinate, the built-in command</h2>
+      <p>macOS ships a command that exists solely for this. Open Terminal:</p>
+      <pre><code>caffeinate -d</code></pre>
+      <p>That prevents the <em>display</em> from sleeping for as long as the command runs. Press <kbd>Control-C</kbd> to stop. The useful flags:</p>
+      <ul>
+        <li><code>-d</code> prevent the display sleeping</li>
+        <li><code>-i</code> prevent idle system sleep</li>
+        <li><code>-s</code> prevent system sleep — mains power only</li>
+        <li><code>-m</code> prevent disks spinning down</li>
+        <li><code>-u</code> declare user activity, as if you had touched the keyboard</li>
+        <li><code>-t 3600</code> do it for 3600 seconds, then stop by itself</li>
+      </ul>
+      <p>The best habit is the timeout. <code>caffeinate -dt 7200</code> keeps the display awake for two hours and then releases — so a forgotten terminal window cannot flatten the battery overnight.</p>
+      <p>You can also tie it to a specific job. This keeps the Mac awake for exactly as long as the command takes and not a second longer:</p>
+      <pre><code>caffeinate -i ./my-long-script.sh</code></pre>
+      <p>And you can attach it to an already-running process by PID:</p>
+      <pre><code>caffeinate -w 54321</code></pre>
+
+      <h2 id="lidclosed">Staying awake with the lid closed</h2>
+      <p>This is the case people actually search for, and the honest answer has a caveat: macOS has no supported setting for "stay awake with the lid shut and no external display". Closed-display operation officially requires an external display, a keyboard and a pointing device — that is <a href="/blog/macbook-clamshell-mode/">clamshell mode</a>.</p>
+      <p>What does work without a monitor:</p>
+      <pre><code>caffeinate -s</code></pre>
+      <p>Leave that running and close the lid. The built-in display sleeps, but the system stays awake and your work continues. It needs mains power — <code>-s</code> is ignored on battery by design.</p>
+      <div class="callout">
+        <p><strong>Watch the temperature</strong></p>
+        <p>A MacBook working hard with the lid shut sheds heat through a smaller surface area. For a download or a backup this is irrelevant. For a multi-hour render, open the lid or put the machine on a stand.</p>
+      </div>
+
+      <h2 id="pmset">pmset, for permanent changes</h2>
+      <p><code>pmset</code> edits the power management settings directly. It needs <code>sudo</code> and it persists across reboots, which makes it both the most powerful option and the easiest to regret.</p>
+      <pre><code># never sleep on mains power
+sudo pmset -c sleep 0
+
+# display off after 30 minutes on mains
+sudo pmset -c displaysleep 30
+
+# see everything currently set
+pmset -g</code></pre>
+      <p>To undo, set the values back rather than trying to remember defaults:</p>
+      <pre><code>sudo pmset -c sleep 10 displaysleep 10</code></pre>
+      <p><code>-c</code> means mains power, <code>-b</code> battery, <code>-a</code> both. Use <code>-c</code>. Disabling sleep on battery is how you find a hot, flat laptop in your bag.</p>
+
+      <h2 id="battery">What this costs you</h2>
+      <p>Preventing sleep keeps the CPU powered and, with <code>-d</code>, the display lit too. A display is typically the largest single power draw in a laptop, so <code>caffeinate -i</code> (system only) costs far less than <code>caffeinate -d</code> (display too). If your goal is a download finishing, you almost never need the display.</p>
+      <p>Battery health is a second-order concern: heat is what ages lithium cells, and a Mac kept artificially awake runs warmer than one that sleeps. Occasional use is nothing to worry about. Permanent <code>pmset</code> changes on battery are worth avoiding.</p>
+
+      <div class="post-cta">
+        <h2>A different thing to do with a closing lid</h2>
+        <p>Newer MacBooks report their hinge angle continuously. <a href="/">Still</a> reads it and folds your desktop as the lid comes down, like the iPhone Duo shutting. Free, open source, and it needs no permission beyond a single screenshot. <a href="/blog/macbook-lid-angle-sensor/">How the sensor works →</a></p>
+      </div>
+    </div>
+    </article>
+  </main>
+  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
+</body>
+</html>

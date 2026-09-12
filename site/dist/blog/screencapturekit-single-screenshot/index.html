@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5f7">
+  <title>Taking a single screenshot with ScreenCaptureKit (Swift)</title>
+  <meta name="description" content="How to capture one still image of every display with SCScreenshotManager, why a screenshot needs the Screen Recording permission, and the TCC trap that wastes an afternoon.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="author" content="Akshay Sharma">
+  <link rel="canonical" href="https://iphoneduoanimation.com/blog/screencapturekit-single-screenshot/">
+  <meta property="og:url" content="https://iphoneduoanimation.com/blog/screencapturekit-single-screenshot/">
+  <meta property="og:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Still">
+  <meta property="og:title" content="Taking a single screenshot with ScreenCaptureKit (Swift)">
+  <meta property="og:description" content="How to capture one still image of every display with SCScreenshotManager, why a screenshot needs the Screen Recording permission, and the TCC trap that wastes an afternoon.">
+  <meta property="article:published_time" content="2026-09-12">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Taking a single screenshot with ScreenCaptureKit (Swift)">
+  <meta name="twitter:description" content="How to capture one still image of every display with SCScreenshotManager, why a screenshot needs the Screen Recording permission, and the TCC trap that wastes an afternoon.">
+  <meta name="twitter:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../styles.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "headline": "Taking one screenshot with ScreenCaptureKit",
+      "description": "How to capture one still image of every display with SCScreenshotManager, why a screenshot needs the Screen Recording permission, and the TCC trap that wastes an afternoon.",
+      "url": "https://iphoneduoanimation.com/blog/screencapturekit-single-screenshot/",
+      "datePublished": "2026-09-12",
+      "dateModified": "2026-09-12",
+      "image": "https://iphoneduoanimation.com/assets/og.png",
+      "author": {
+        "@type": "Person",
+        "name": "Akshay Sharma",
+        "url": "https://akki.dev"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Akshay Sharma"
+      },
+      "mainEntityOfPage": "https://iphoneduoanimation.com/blog/screencapturekit-single-screenshot/"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Still",
+          "item": "https://iphoneduoanimation.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Blog",
+          "item": "https://iphoneduoanimation.com/blog/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "ScreenCaptureKit",
+          "item": "https://iphoneduoanimation.com/blog/screencapturekit-single-screenshot/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why does taking a screenshot need Screen Recording permission on macOS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "macOS has no separate permission for a single still image. Every capture API, including SCScreenshotManager, sits under the Screen Recording TCC permission, so an app that takes one screenshot triggers the same prompt as one that records video continuously."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does CGRequestScreenCaptureAccess return false without showing a prompt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Because a decision is already recorded, or because the process is not user-launched. macOS attributes a TCC request to the responsible process; an app launched from a terminal or tool process can inherit that process's decision and never see a dialog."
+          }
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#article">Skip to the article</a>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Main navigation">
+      <a class="wordmark" href="/" aria-label="Still home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 7h16v18H7z" fill="none" stroke="currentColor" stroke-width="1.8" rx="3"/><path d="m7 7 12 4v18L7 25Z" fill="#f5f5f7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>still<span class="wordmark-dot">.</span></a>
+      <div class="nav-links"><a href="/#demo">The effect</a><a href="/#how">How it works</a><a href="/#compatibility">Which Macs</a><a href="/blog/">Blog</a></div>
+      <a class="nav-cta" href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <main>
+    <article>
+    <div class="post-head shell">
+      <p class="breadcrumb"><a href="/">Still</a> → <a href="/blog/">Blog</a> → ScreenCaptureKit</p>
+      <h1>Taking one screenshot with ScreenCaptureKit</h1>
+      <div class="post-meta"><time datetime="2026-09-12">12 September 2026</time><span>·</span><span>8 min read</span><span>·</span><span>Development</span></div>
+    </div>
+
+    <div class="post-body shell" id="article">
+      <p class="post-lede">ScreenCaptureKit replaced the old CoreGraphics capture APIs, and for video it is a clear improvement. For a single still image it is fine too — once you get past a permission model that is genuinely confusing.</p>
+
+      <h2 id="one">Capturing one image</h2>
+      <p><code>SCScreenshotManager.captureImage</code> is the single-shot API. You need a content filter describing what to capture and a configuration describing how:</p>
+      <pre><code>import ScreenCaptureKit
+
+func snapshot(of display: SCDisplay,
+              excluding apps: [SCRunningApplication]) async throws -&gt; CGImage {
+    let filter = SCContentFilter(display: display,
+                                 excludingApplications: apps,
+                                 exceptingWindows: [])
+    let config = SCStreamConfiguration()
+    config.width  = CGDisplayPixelsWide(display.displayID)
+    config.height = CGDisplayPixelsHigh(display.displayID)
+    config.showsCursor = false
+    config.capturesAudio = false
+    config.pixelFormat = kCVPixelFormatType_32BGRA
+    return try await SCScreenshotManager.captureImage(contentFilter: filter,
+                                                     configuration: config)
+}</code></pre>
+      <p>Excluding your own app matters more than it sounds. If you are about to draw the captured image on screen, and your own window is in the capture, you get a feedback loop — a picture of a picture of a picture.</p>
+
+      <h2 id="all">Capturing every display in one pass</h2>
+      <p>A common mistake is capturing only the main display, or only the built-in one. On a laptop driving an external monitor, that means your capture covers the screen the user is not looking at.</p>
+      <p><code>SCShareableContent</code> is the slow part of this, so query it once and reuse it across displays rather than asking per screen — and the display set can change between calls, which is its own bug:</p>
+      <pre><code>func snapshotAll() async throws -&gt; [(NSScreen, CGImage)] {
+    let content = try await SCShareableContent.excludingDesktopWindows(
+        false, onScreenWindowsOnly: true)
+    let mine = content.applications.filter {
+        $0.bundleIdentifier == Bundle.main.bundleIdentifier
+    }
+
+    var shots: [(NSScreen, CGImage)] = []
+    for screen in NSScreen.screens {
+        guard let number = screen.deviceDescription[
+                  NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
+              let display = content.displays.first(where: {
+                  $0.displayID == number.uint32Value
+              }) else { continue }
+        shots.append((screen, try await snapshot(of: display, excluding: mine)))
+    }
+    return shots
+}</code></pre>
+
+      <h2 id="permission">Why a screenshot needs Screen Recording</h2>
+      <p>There is no "take one screenshot" permission on macOS. Every capture API lives under the Screen Recording TCC permission, so an app that grabs a single frame and throws it away triggers the same dialog as one that records your screen continuously — the one that says the app "would like to record this computer's screen and audio".</p>
+      <p>You cannot soften that wording. <code>NSScreenCaptureUsageDescription</code> in your Info.plist lets you explain yourself, but the system dialog says what it says. If your app genuinely only takes a still, the honest move is to explain it in your own UI before the prompt appears, and to make the code easy to check.</p>
+
+      <h2 id="tcc">The TCC trap</h2>
+      <p>This is the part that cost me most of a day, so it is the part worth writing down.</p>
+      <p><code>CGRequestScreenCaptureAccess()</code> is the CoreGraphics call for requesting access. On current macOS it can return <code>false</code> and show no dialog at all. Silently. Your app looks broken and there is nothing to click.</p>
+      <p>Two reasons:</p>
+      <ul>
+        <li><strong>A decision is already recorded.</strong> Once an app has been offered the prompt and refused, it will not be asked again. <code>tccutil reset ScreenCapture &lt;bundle-id&gt;</code> clears it.</li>
+        <li><strong>The process is not user-launched.</strong> macOS attributes a TCC request to the <em>responsible process</em>, walking up the process tree. An app launched from a terminal, a script or a build tool can be attributed to that launcher — and answered with the launcher's decision. No dialog ever appears for your app because your app was never the one being asked.</li>
+      </ul>
+      <p>The second one is brutal to debug, because every fix you try from the terminal fails identically. The tell is that touching ScreenCaptureKit produces a real error message where the CoreGraphics call produces only a bool:</p>
+      <pre><code>_ = try await SCShareableContent.excludingDesktopWindows(
+        false, onScreenWindowsOnly: true)
+// throws: "The user declined TCCs for application, window, display capture"</code></pre>
+      <p>Two practical conclusions. First, prefer touching <code>SCShareableContent</code> over <code>CGRequestScreenCaptureAccess()</code> when you want the prompt — it is the modern path and it tells you what went wrong. Second, test permission flows by launching the app <strong>from Finder</strong>, like a user would. A build-and-run loop from a terminal can produce a permission state that no real user will ever hit.</p>
+
+      <h2 id="signing">One more: ad-hoc signing drops the grant</h2>
+      <p>TCC binds a grant to the app's designated requirement. Sign ad hoc with <code>codesign --sign -</code> and that requirement is a bare hash of the binary — so every rebuild is a different app, and the permission the user granted five minutes ago is silently gone. System Settings will still show the app listed and enabled, pointing at a build that no longer exists.</p>
+      <p>Sign with a real development certificate instead. The requirement then names the bundle ID and the certificate, both of which survive a rebuild. If you automate picking the certificate, pin it — <code>security find-identity</code> does not guarantee a stable order, and quietly alternating between two certificates reproduces the original bug exactly.</p>
+
+      <div class="post-cta">
+        <h2>The app this came out of</h2>
+        <p><a href="/">Still</a> takes one ScreenCaptureKit snapshot when your MacBook lid starts to close, folds it with a Metal shader, and throws it away when you open the lid again. Around 40 lines of capture code, MIT licensed, <a href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">all of it on GitHub</a>.</p>
+      </div>
+    </div>
+    </article>
+  </main>
+  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
+</body>
+</html>
