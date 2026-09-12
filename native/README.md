@@ -1,5 +1,7 @@
 # Still for Mac — free prototype
 
+Contributors: [Akshay Sharma](https://akki.dev) and [Kavish Shah](https://kavish.vercel.app).
+
 Still adds a perspective-and-frost effect to a temporary desktop snapshot. It includes an image preview, a four-second desktop demo, and sensor-driven closing/reversal on compatible MacBooks.
 
 **Status:** native source is implemented but has not yet been compiled or exercised on macOS. This project was authored on Windows. Do not distribute it as a tested or notarized release.

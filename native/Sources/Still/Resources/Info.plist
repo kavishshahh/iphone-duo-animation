@@ -12,5 +12,5 @@
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSScreenCaptureUsageDescription</key><string>Still takes a single snapshot of your desktop when the lid starts to close, so it can fold that picture. No video, no audio, nothing saved or sent anywhere; the image is discarded when the lid reopens.</string>
-<key>NSHumanReadableCopyright</key><string>Still prototype. 2026.</string>
+<key>NSHumanReadableCopyright</key><string>Copyright © 2026 Akshay Sharma and Kavish Shah (https://kavish.vercel.app).</string>
 </dict></plist>

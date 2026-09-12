@@ -2,7 +2,9 @@
 
 Free, open source iPhone Duo-style lid animation for Mac. Close your MacBook lid and the desktop tilts, frosts over and dims with it. A small menu bar app written in Swift, Metal and SwiftUI. MIT licensed.
 
-Website and interactive demo: https://still.akki.dev
+Website and interactive demo: https://www.iphoneduoanimation.com
+
+Free Duo animation for Mac setup guide: https://www.iphoneduoanimation.com/blog/duo-animation-for-mac/
 
 **Status:** early prototype. The code is written and the geometry is unit tested, but it has not been exercised on real Macs yet. It needs people with sensor-equipped MacBooks (14/16-inch Pro from 2021, Air from M2) to run it and report back. Open an issue with your model identifier and what the "Your Mac" tab says.
 
@@ -43,6 +45,8 @@ See [`native/README.md`](native/README.md) for how it works, its limits, and wha
 - `FEASIBILITY.md` the research that started this.
 
 ## Credits
+
+Contributors: [Akshay Sharma](https://akki.dev) and [Kavish Shah](https://kavish.vercel.app).
 
 The HID report layout for the lid angle sensor follows the findings of [Sam Henri Gold's LidAngleSensor](https://github.com/samhenrigold/LidAngleSensor) (Apache 2.0). The browser demo uses [three.js](https://threejs.org) (MIT). The wallpaper was made for this project.
 

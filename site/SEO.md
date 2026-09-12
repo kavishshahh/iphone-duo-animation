@@ -1,5 +1,43 @@
 # SEO strategy for iphoneduoanimation.com
 
+## Product keyword focus — 12 September 2026
+
+The homepage targets **Duo animation for Mac**, **iPhone Duo animation for Mac**,
+**free Duo animation for Mac**, **open source Duo animation**, and **MacBook lid
+animation**. Use the natural spelling "open source" in copy; do not stuff in
+"opensource" variants or add a meta-keywords tag.
+
+- Homepage: aligned title, H1, description, social cards, visible FAQs and source-download copy.
+- /blog/duo-animation-for-mac/: a setup guide for download, installation,
+  compatibility and troubleshooting intent, linked from the homepage, blog hub
+  and lid-sensor article and included in sitemap.xml.
+- Structured data: connected WebSite, WebPage, SoftwareApplication and
+  SoftwareSourceCode entities; the guide has TechArticle and BreadcrumbList data.
+  The price is zero and source-build/prototype requirements are explicit. No
+  invented reviews, ratings or promise of rich results.
+- Canonical origin: https://www.iphoneduoanimation.com. The non-www origin
+  returned a 308 redirect to www on 12 September 2026; www returned 200 from
+  Vercel. Canonicals, structured-data URLs, social URLs and the sitemap now use
+  the final origin. The existing Sites registration is unpublished and private;
+  the public SEO target is the existing Vercel site.
+
+These are relevance targets based on the requested phrases, not newly measured
+search volumes or ranking forecasts. After publication, submit
+https://www.iphoneduoanimation.com/sitemap.xml in Search Console and inspect the
+homepage and setup-guide URLs. Track impressions, clicks and positions for this
+cluster before expanding it. Deployment and Search Console submission are
+separate actions; local edits do not establish that either has happened.
+
+References: [Google Search Essentials](https://developers.google.com/search/docs/essentials),
+[title links](https://developers.google.com/search/docs/appearance/title-link), and
+[snippets](https://developers.google.com/search/docs/appearance/snippet).
+
+## Earlier keyword research
+
+The research and forecasts below are retained from the existing document; they
+were not re-run or independently verified for this product-keyword update.
+
+
 All search volumes below are real, pulled from Serpstat's US Google database on
 2026-09-12 via treg. Difficulty ("KD") is Serpstat's 0–100 scale. Nothing here is
 estimated or invented — where a number is missing, the API returned no measurable

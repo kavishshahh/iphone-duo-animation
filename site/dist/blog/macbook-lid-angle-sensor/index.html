@@ -7,10 +7,10 @@
   <title>The MacBook lid angle sensor, explained (and how to read it)</title>
   <meta name="description" content="Which MacBooks have a lid angle sensor, what it reports, and how to read the hinge angle yourself in Swift over IOKit HID. Tested on a MacBook Pro M3 Pro.">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <meta name="author" content="Akshay Sharma">
-  <link rel="canonical" href="https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
-  <meta property="og:url" content="https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
-  <meta property="og:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta name="author" content="Akshay Sharma, Kavish Shah">
+  <link rel="canonical" href="https://www.iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
+  <meta property="og:url" content="https://www.iphoneduoanimation.com/blog/macbook-lid-angle-sensor/">
+  <meta property="og:image" content="https://www.iphoneduoanimation.com/assets/og.png">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Still">
   <meta property="og:title" content="The MacBook lid angle sensor, explained (and how to read it)">
@@ -19,7 +19,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="The MacBook lid angle sensor, explained">
   <meta name="twitter:description" content="Which MacBooks have one, what it reports, and how to read it in Swift.">
-  <meta name="twitter:image" content="https://iphoneduoanimation.com/assets/og.png">
+  <meta name="twitter:image" content="https://www.iphoneduoanimation.com/assets/og.png">
   <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../styles.css">
   <script type="application/ld+json">
@@ -30,22 +30,28 @@
         "@type": "TechArticle",
         "headline": "The MacBook lid angle sensor, explained (and how to read it)",
         "description": "Which MacBooks have a lid angle sensor, what it reports, and how to read the hinge angle yourself in Swift over IOKit HID.",
-        "url": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
+        "url": "https://www.iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
         "datePublished": "2026-09-12",
         "dateModified": "2026-09-12",
-        "image": "https://iphoneduoanimation.com/assets/og.png",
-        "author": { "@type": "Person", "name": "Akshay Sharma", "url": "https://akki.dev" },
-        "publisher": { "@type": "Person", "name": "Akshay Sharma" },
-        "mainEntityOfPage": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
+        "image": "https://www.iphoneduoanimation.com/assets/og.png",
+        "author": [
+          {"@type":"Person","name":"Akshay Sharma","url":"https://akki.dev"},
+          {"@type":"Person","name":"Kavish Shah","url":"https://kavish.vercel.app"}
+        ],
+        "publisher": [
+          {"@type":"Person","name":"Akshay Sharma"},
+          {"@type":"Person","name":"Kavish Shah","url":"https://kavish.vercel.app"}
+        ],
+        "mainEntityOfPage": "https://www.iphoneduoanimation.com/blog/macbook-lid-angle-sensor/",
         "proficiencyLevel": "Intermediate",
         "keywords": "lid angle sensor, macbook lid angle sensor, IOKit HID, macOS development"
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Still", "item": "https://iphoneduoanimation.com/" },
-          { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://iphoneduoanimation.com/blog/" },
-          { "@type": "ListItem", "position": 3, "name": "The MacBook lid angle sensor", "item": "https://iphoneduoanimation.com/blog/macbook-lid-angle-sensor/" }
+          { "@type": "ListItem", "position": 1, "name": "Still", "item": "https://www.iphoneduoanimation.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.iphoneduoanimation.com/blog/" },
+          { "@type": "ListItem", "position": 3, "name": "The MacBook lid angle sensor", "item": "https://www.iphoneduoanimation.com/blog/macbook-lid-angle-sensor/" }
         ]
       },
       {
@@ -74,7 +80,7 @@
     <div class="post-head shell">
       <p class="breadcrumb"><a href="/">Still</a> → <a href="/blog/">Blog</a> → Lid angle sensor</p>
       <h1>The MacBook lid angle sensor, explained</h1>
-      <div class="post-meta"><time datetime="2026-09-12">12 September 2026</time><span>·</span><span>9 min read</span><span>·</span><span>By Akshay Sharma</span></div>
+      <div class="post-meta"><time datetime="2026-09-12">12 September 2026</time><span>·</span><span>9 min read</span><span>·</span><span>By <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> and <a href="https://kavish.vercel.app" rel="noopener">Kavish Shah</a></span></div>
     </div>
 
     <div class="post-body shell" id="article">
@@ -191,11 +197,11 @@ func lidAngle() -> Double? {
 
       <div class="post-cta">
         <h2>Still is the sensor, put to work</h2>
-        <p>An open source menu bar app that folds your desktop as the lid comes down. MIT licensed, nothing leaves your Mac, and the sensor code above is the real thing it ships with. <a href="/">Try the interactive demo</a> or <a href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">read the source on GitHub</a>.</p>
+        <p>An open source menu bar app that folds your desktop as the lid comes down. MIT licensed, nothing leaves your Mac, and the sensor code above is the real thing it ships with. <a href="/blog/duo-animation-for-mac/">Set up free Duo animation for Mac</a>, <a href="/#demo">try the interactive demo</a> or <a href="https://github.com/kavishshahh/iphone-duo-animation" rel="noopener">read the source on GitHub</a>.</p>
       </div>
     </div>
     </article>
   </main>
-  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> in New Delhi.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
+  <footer class="shell"><a class="footer-logo" href="/">still.</a><p>Made for the joy of it by <a href="https://akki.dev" rel="noopener">Akshay Sharma</a> and <a href="https://kavish.vercel.app" rel="noopener">Kavish Shah</a>.</p><span>Independent open source project. Not affiliated with or endorsed by Apple. iPhone, iPhone Duo, Mac and MacBook are trademarks of Apple Inc.</span></footer>
 </body>
 </html>

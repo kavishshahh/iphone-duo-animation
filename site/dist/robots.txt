@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /downloads/
 
-Sitemap: https://iphoneduoanimation.com/sitemap.xml
+Sitemap: https://www.iphoneduoanimation.com/sitemap.xml
